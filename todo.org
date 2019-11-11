@@ -11,7 +11,8 @@ CLOSED: [2019-11-08 Fri 12:51]
 * TODO Argument handling
 ** TODO Learn the [[https://github.com/pcapriotti/optparse-applicative][optparse-applicative library]].
 *** Probably want to use [[https://github.com/pcapriotti/optparse-applicative#commands][Commands]].
-*** Figure out how to make it work without the global flag option
+*** DONE Figure out how to make it work without the global flag option from [[https://tech.fpcomplete.com/haskell/library/optparse-applicative][this example]].
+CLOSED: [2019-11-11 Mon 14:47]
 ** TODO Define command format
 *** data Command = ...
 *** Should have:

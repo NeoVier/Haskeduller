@@ -2,16 +2,12 @@ module Main where
 
 import Data.Semigroup ((<>))
 import Data.Time
+import Data.Version (showVersion)
 import Lib
 import Options.Applicative
+import Paths_Haskeduller (version) -- Displays same version as in package.yaml
 import Task
 import Testing
-
-data Opts =
-  Opts
-    { optGlobalFlag :: !Bool
-    , optCommand :: !Command
-    }
 
 data Command
   = List Bool
@@ -19,10 +15,12 @@ data Command
   | Remove String
   | Update String String
 
+type Opts = Command
+
 main :: IO ()
 main = do
   opts <- execParser optsParser
-  case optCommand opts of
+  case opts of
     List val -> putStrLn ("Listing tasks: " ++ show val)
     Add name -> putStrLn ("Adding new task: " ++ name)
     Remove name -> putStrLn ("Removing task: " ++ name)
@@ -36,10 +34,10 @@ main = do
          progDesc "optparse subcommands example" <>
          header "Haskeduller - an Org mode inspired TODO list")
     versionOption :: Parser (a -> a)
-    versionOption = infoOption "0.0" (long "version" <> help "Show version")
+    versionOption =
+      infoOption (showVersion version) (long "version" <> help "Show version")
     programOptions :: Parser Opts
     programOptions =
-      Opts <$> switch (long "global-flag" <> help "Set a global flag") <*>
       hsubparser (listCommand <> addCommand <> removeCommand <> updateCommand)
     listCommand :: Mod CommandFields Command
     listCommand =
