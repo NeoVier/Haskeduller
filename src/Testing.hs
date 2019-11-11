@@ -14,10 +14,15 @@ exampleDay = fromGregorian 2019 10 29
 
 superTask :: Task
 superTask =
-  Complex "SuperTask" (Just exampleDay) "SuperDesc" [complexTask, simpleTask]
+  Complex
+    Todo
+    "SuperTask"
+    (Just exampleDay)
+    "SuperDesc"
+    [complexTask, simpleTask]
 
 complexTask :: Task
-complexTask = Complex "ComplexTask" Nothing "ComplexDesc" [simpleTask]
+complexTask = Complex Done "ComplexTask" Nothing "ComplexDesc" [simpleTask]
 
 simpleTask :: Task
-simpleTask = Simple "SimpleTask" (Just exampleDay) "SimpleDesc"
+simpleTask = Simple None "SimpleTask" (Just exampleDay) "SimpleDesc"

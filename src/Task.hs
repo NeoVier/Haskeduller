@@ -1,5 +1,6 @@
 module Task
   ( Task(Simple, Complex)
+  , State(Todo, Done, None)
   , taskToString
   , dayToString
   ) where
@@ -11,32 +12,47 @@ type Name = String
 
 type Description = String
 
+data State
+  = Todo
+  | Done
+  | None
+
+instance Show State where
+  show Todo = "TODO: "
+  show Done = "DONE: "
+  show None = ""
+
 data Task
   = Simple
-      { name :: Name
+      { state :: State
+      , name :: Name
       , date :: Maybe Day
       , description :: Description
       }
   | Complex
-      { name :: Name
+      { state :: State
+      , name :: Name
       , date :: Maybe Day
       , description :: Description
       , children :: [Task]
       }
-  deriving (Show)
+
+instance Show Task where
+  show t = taskToString t 0
 
 taskToString :: Task -> Integer -> String
-taskToString (Complex name day desc subtasks) indentation =
-  taskToString (Simple name day desc) indentation ++ childrenTasks
+taskToString (Complex state name day desc subtasks) indentation =
+  taskToString (Simple state name day desc) indentation ++ childrenTasks
   where
     childrenTasks =
       concat
         ["\n\n" ++ taskToString subtask (indentation + 1) | subtask <- subtasks]
-taskToString (Simple name day desc) indentation =
+taskToString (Simple state name day desc) indentation =
   case day of
-    Nothing -> indent ++ name ++ "\n\t" ++ indent ++ desc
+    Nothing -> indent ++ show state ++ name ++ "\n\t" ++ indent ++ desc
     Just day ->
-      indent ++ name ++ ": " ++ dayToString day ++ "\n\t" ++ indent ++ desc
+      indent ++
+      show state ++ name ++ ": " ++ dayToString day ++ "\n\t" ++ indent ++ desc
   where
     indent = concat ["\t" | _ <- [1 .. indentation]]
 
