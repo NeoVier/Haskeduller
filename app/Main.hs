@@ -5,7 +5,7 @@ import Data.Time
 import Data.Version (showVersion)
 import Lib
 import Options.Applicative
-import Paths_Haskeduller (version) -- Displays same version as in package.yaml
+import Paths_Haskeduller (version)
 import Task
 import Testing
 
