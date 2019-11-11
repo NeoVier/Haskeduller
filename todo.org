@@ -1,0 +1,63 @@
+* DONE Task modelling
+CLOSED: [2019-11-08 Fri 12:51]
+** DONE Tasks must have:
+*** Name;
+*** Description.
+** DONE Some (but not all) tasks may have other nested tasks.
+** DONE Tasks can have dates.
+** DONE Tasks have States (Todo, Done or None).
+
+
+* TODO Argument handling
+** TODO Learn the [[https://github.com/pcapriotti/optparse-applicative][optparse-applicative library]].
+*** Probably want to use [[https://github.com/pcapriotti/optparse-applicative#commands][Commands]].
+*** Figure out how to make it work without the global flag option
+** TODO Define command format
+*** data Command = ...
+*** Should have:
+**** List [option]
+***** List everything
+***** List this week
+***** List today
+***** List in a certain day
+***** List in a time frame
+**** Add [task] [parent?]
+***** Add to a Complex task
+***** Add a new separate task
+**** Remove [task]
+***** Remove from a Complex task
+***** Remove a separate task (and its possible children)
+**** Update [task] [options]
+***** Change name, description, date, state
+***** Cycle through states
+** TODO Define commands.
+*** List
+**** List everything
+**** List this week
+**** List today
+**** List in a certain day
+**** List in a time frame
+*** Add
+**** Add to a Complex task
+**** Add a new separate task
+*** Remove
+**** Remove from a Complex task
+**** Remove a separate task (and its possible children)
+*** Change/Update
+**** Change name, description, date, state
+**** Cycle through states
+** TODO Call appropriate function(s).
+
+
+* TODO Task scheduling
+** TODO Schedule a new task.
+*** TODO Decide format to write to file.
+*** TODO Write to file.
+
+
+* TODO Task printing
+** DONE Task to string conversion.
+** TODO Print all tasks.
+** TODO Print one specific task.
+** TODO Print all specific tasks up until a certain date.
+** TODO Print all tasks inbetween two dates.
