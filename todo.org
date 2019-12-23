@@ -2,18 +2,22 @@
 CLOSED: [2019-11-08 Fri 12:51]
 ** DONE Tasks must have:
 *** Name;
-*** Description.
+*** Description;
+*** ID.
 ** DONE Some (but not all) tasks may have other nested tasks.
 ** DONE Tasks can have dates.
 ** DONE Tasks have States (Todo, Done or None).
 
 
-* TODO Argument handling
-** TODO Learn the [[https://github.com/pcapriotti/optparse-applicative][optparse-applicative library]].
+* DONE Argument handling
+CLOSED: [2019-11-18 Mon 13:35]
+** DONE Learn the [[https://github.com/pcapriotti/optparse-applicative][optparse-applicative library]].
+CLOSED: [2019-11-12 Tue 18:09]
 *** Probably want to use [[https://github.com/pcapriotti/optparse-applicative#commands][Commands]].
 *** DONE Figure out how to make it work without the global flag option from [[https://tech.fpcomplete.com/haskell/library/optparse-applicative][this example]].
 CLOSED: [2019-11-11 Mon 14:47]
-** TODO Define command format
+** DONE Define command format
+CLOSED: [2019-11-12 Tue 18:09]
 *** data Command = ...
 *** Should have:
 **** List [option]
@@ -31,30 +35,33 @@ CLOSED: [2019-11-11 Mon 14:47]
 **** Update [task] [options]
 ***** Change name, description, date, state
 ***** Cycle through states
-** TODO Define commands.
-*** List
+** DONE Define commands.
+CLOSED: [2019-11-18 Mon 13:35]
+*** DONE List
+CLOSED: [2019-11-18 Mon 13:35]
 **** List everything
 **** List this week
 **** List today
 **** List in a certain day
 **** List in a time frame
-*** Add
+*** DONE Add
+CLOSED: [2019-11-12 Tue 18:10]
 **** Add to a Complex task
 **** Add a new separate task
-*** Remove
-**** Remove from a Complex task
+*** DONE Remove
+CLOSED: [2019-11-12 Tue 18:10]
 **** Remove a separate task (and its possible children)
-*** Change/Update
+*** DONE Change/Update
+CLOSED: [2019-11-18 Mon 13:34]
 **** Change name, description, date, state
-**** Cycle through states
-** TODO Call appropriate function(s).
+**** DONE Cycle through states
+CLOSED: [2019-11-18 Mon 13:34]
 
 
 * TODO Task scheduling
 ** TODO Schedule a new task.
 *** TODO Decide format to write to file.
 *** TODO Write to file.
-
 
 * TODO Task printing
 ** DONE Task to string conversion.

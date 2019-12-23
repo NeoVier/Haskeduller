@@ -1,12 +1,15 @@
 module Task
-  ( Task(Simple, Complex)
-  , State(Todo, Done, None)
+  ( Task(..)
+  , taskFactory
+  , State(..)
   , Name
   , Description
   , Id
   , boolToState
   , taskToString
   , dayToString
+  , changeId
+  , filePath
   ) where
 
 import Data.Time
@@ -16,7 +19,7 @@ type Name = String
 
 type Description = String
 
-type Id = Int
+type Id = String
 
 data State
   = Todo
@@ -34,14 +37,14 @@ boolToState False = None
 
 data Task
   = Simple
-      { id :: Id
+      { identifier :: Id
       , state :: State
       , name :: Name
       , date :: Maybe Day
       , description :: Description
       }
   | Complex
-      { id :: Id
+      { identifier :: Id
       , state :: State
       , name :: Name
       , date :: Maybe Day
@@ -53,19 +56,36 @@ instance Show Task where
   show t = taskToString t 0
 
 simple :: Task -> Task
-simple (Complex id state name date description _) =
-  Simple id state name date description
+simple (Complex identifier state name date description _) =
+  Simple
+    { identifier = identifier
+    , state = state
+    , name = name
+    , date = date
+    , description = description
+    }
+
+taskFactory ::
+     Id -> State -> Name -> Maybe Day -> Description -> Maybe [Task] -> Task
+taskFactory id state name date description children =
+  case children of
+    Nothing -> Simple id state name date description
+    (Just subtasks) -> Complex id state name date description subtasks
+
+changeId :: Task -> Id -> Task
+changeId task id = task {identifier = id}
 
 taskToString :: Task -> Integer -> String
-taskToString (Simple id state name day desc) indentation =
+taskToString (Simple identifier state name day desc) indentation =
   case day of
     Nothing ->
       indent ++
-      "[" ++ show id ++ "] " ++ show state ++ name ++ ": \n\t" ++ indent ++ desc
+      "[" ++
+      identifier ++ "] " ++ show state ++ name ++ ": \n\t" ++ indent ++ desc
     Just day ->
       indent ++
       "[" ++
-      show id ++
+      identifier ++
       "] " ++
       show state ++ name ++ ": " ++ dayToString day ++ "\n\t" ++ indent ++ desc
   where
@@ -83,3 +103,13 @@ dayToString :: Day -> String
 dayToString day = show d ++ "-" ++ show m ++ "-" ++ show y
   where
     (y, m, d) = toGregorian day
+
+filePath :: FilePath
+filePath = "/home/henrique/SCHED"
+------------------------------ File handling -----------------------------------
+-- Move to another file?
+  -- Could use readFile, writeFile
+{-today :: IO String
+today = do
+  day <- utctDay <$> getCurrentTime
+  return (dayToString day)-}

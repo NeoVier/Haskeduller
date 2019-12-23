@@ -1,19 +1,25 @@
 module Lib
-  --( addTask
-  --, readTasks
-  (
+  ( executeJSon
   ) where
 
 import Data.Time
 import Data.Time.Calendar
+import Reading.JsonHelper
+import Reading.JsonP
+import Reading.Parser
+import Reading.TaskFromJson
 import Task
 import Testing
 
 scheduleFilePath :: FilePath
 scheduleFilePath = "/home/henrique/.haskeduller.sched"
---addTask :: Task -> IO ()
---addTask task = appendFile scheduleFilePath (taskToString task 0 ++ "\n\n")
---readTasks :: IO String
---readTasks = readFile scheduleFilePath
---parseTasks :: [String] -> Task
---parseTasks [firstLine, description] = undefined
+
+executeJSon :: FilePath -> IO ()
+executeJSon file = do
+  result <- parseFile file jsonValue
+  case result of
+    Nothing -> putStrLn $ parseError file
+    Just contents -> print (mapJsonArray taskFromJson contents)
+
+parseError :: FilePath -> String
+parseError file = "Could not parse file: " ++ file
