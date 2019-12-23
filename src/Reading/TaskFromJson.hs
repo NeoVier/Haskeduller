@@ -15,6 +15,14 @@ taskFromJson (JsonObject [("identifier", id), ("state", state), ("name", name), 
     (nameFromJson name)
     (dateFromJson date)
     (descriptionFromJson description)
+taskFromJson (JsonObject [("identifier", id), ("state", state), ("name", name), ("date", date), ("description", description), ("children", children)]) =
+  Complex
+    (idFromJson id)
+    (stateFromJson state)
+    (nameFromJson name)
+    (dateFromJson date)
+    (descriptionFromJson description)
+    (mapJsonArray taskFromJson children)
 taskFromJson _ = error "Reading.TaskFromJson.taskFromJson: Invalid task"
 
 idFromJson :: JsonValue -> Id
