@@ -1,5 +1,5 @@
 module Lib
-  ( executeJSon
+  ( listAll
   ) where
 
 import Data.Time
@@ -14,12 +14,9 @@ import Testing
 scheduleFilePath :: FilePath
 scheduleFilePath = "/home/henrique/.haskeduller.sched"
 
-executeJSon :: FilePath -> IO ()
-executeJSon file = do
-  result <- parseFile file jsonValue
-  case result of
+listAll :: FilePath -> IO ()
+listAll file = do
+  tasks <- parseFile file jsonValue
+  case tasks of
+    Just contents -> mapM_ print (mapJsonArray taskFromJson contents)
     Nothing -> putStrLn $ parseError file
-    Just contents -> print (mapJsonArray taskFromJson contents)
-
-parseError :: FilePath -> String
-parseError file = "Could not parse file: " ++ file

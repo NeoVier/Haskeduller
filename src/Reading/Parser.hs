@@ -7,6 +7,7 @@ module Reading.Parser
   , whitespace
   , sepBy
   , parseFile
+  , parseError
   ) where
 
 import Control.Applicative
@@ -72,3 +73,6 @@ parseFile :: FilePath -> Parser a -> IO (Maybe a)
 parseFile fileName parser = do
   input <- readFile fileName
   return (snd <$> runParser parser input)
+
+parseError :: FilePath -> String
+parseError file = "Could not parse file: " ++ file

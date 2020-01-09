@@ -33,7 +33,8 @@ main :: IO ()
 main = do
   opts <- execParser optsParser
   case opts of
-    List val -> print "Listing" --readTaskFile
+    List All -> listAll "test/example.json"
+    List _ -> error "Not yet implemented"
     Add name state date description parent_id -> print "Adding"
             {--if date == fromGregorian 1 1 1
         then addTask
