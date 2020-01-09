@@ -1,7 +1,8 @@
 module Lib
-  ( listAll
+  ( execList
   ) where
 
+import Data.Maybe (isNothing)
 import Data.Time
 import Data.Time.Calendar
 import Reading.JsonHelper
@@ -14,9 +15,14 @@ import Testing
 scheduleFilePath :: FilePath
 scheduleFilePath = "/home/henrique/.haskeduller.sched"
 
-listAll :: FilePath -> IO ()
-listAll file = do
-  tasks <- parseFile file jsonValue
-  case tasks of
-    Just contents -> mapM_ print (mapJsonArray taskFromJson contents)
+execList :: FilePath -> String -> IO ()
+execList file period = do
+  jsonTasks <- parseFile file jsonValue
+  case jsonTasks of
+    Just contents -> mapM_ print (filterTasks period tasks)
+      where tasks = mapJsonArray taskFromJson contents
     Nothing -> putStrLn $ parseError file
+
+filterTasks :: String -> [Task] -> [Task]
+filterTasks "without" xs = filter (isNothing . date) xs
+filterTasks "all" xs = xs
