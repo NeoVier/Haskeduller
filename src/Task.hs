@@ -9,7 +9,6 @@ module Task
   , taskToString
   , dayToString
   , changeId
-  , filePath
   ) where
 
 import Data.Time
@@ -100,16 +99,9 @@ taskToString task indentation =
         ]
 
 dayToString :: Day -> String
-dayToString day = show d ++ "-" ++ show m ++ "-" ++ show y
+dayToString day = padNum d ++ "/" ++ padNum m ++ "/" ++ padNum y
   where
     (y, m, d) = toGregorian day
-
-filePath :: FilePath
-filePath = "/home/henrique/SCHED"
------------------------------- File handling -----------------------------------
--- Move to another file?
-  -- Could use readFile, writeFile
-{-today :: IO String
-today = do
-  day <- utctDay <$> getCurrentTime
-  return (dayToString day)-}
+    padNum x
+      | x < 10 = "0" ++ show x
+      | otherwise = show x

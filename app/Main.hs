@@ -1,16 +1,5 @@
 module Main where
-
-import Data.Semigroup ((<>))
-import Data.Time
-import Data.Version (showVersion)
-import Lib
-import Options.Applicative
-import Paths_Haskeduller (version)
-import Reading.JsonHelper
-import Task
-import Testing
-
-data Command
+        {--data Command
   = List ListOptions
   | Add Name Bool Day Description Id
   | Remove Id
@@ -28,14 +17,24 @@ data ListOptions
   deriving (Show)
 
 type Opts = Command
+--}
+
+import CommandOptions
+import Data.Semigroup ((<>))
+import Data.Time
+import Data.Version (showVersion)
+import Lib
+import Options.Applicative
+import Paths_Haskeduller (version)
+import Reading.JsonHelper
+import Task
+import Testing
 
 main :: IO ()
 main = do
   opts <- execParser optsParser
   case opts of
-    List All -> execList "test/example.json" "all"
-    List WithoutDate -> execList "test/example.json" "without"
-    List _ -> error "Not yet implemented"
+    List opt -> execList "test/example.json" opt
     Add name state date description parent_id -> print "Adding"
             {--if date == fromGregorian 1 1 1
         then addTask
@@ -206,9 +205,9 @@ updateOptions =
 dayReader :: ReadM Day
 dayReader =
   eitherReader $ \arg ->
-    case parseTimeM True defaultTimeLocale "%d-%m-%Y" arg of
+    case parseTimeM True defaultTimeLocale "%d/%m/%Y" arg of
       Nothing ->
         Left
           ("Cannot parse date: " ++
-           arg ++ "\n Make sure it's in the format %d-%m-%Y.")
+           arg ++ "\n Make sure it's in the format %d/%m/%Y.")
       Just day -> Right day
