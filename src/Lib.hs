@@ -1,6 +1,6 @@
 module Lib
   ( execList
-  , getToday
+  , findSunday
   ) where
 
 import CommandOptions (ListOptions(..))
@@ -33,20 +33,28 @@ filterTasks Tomorrow today xs = filter (sameDay tomorrow . date) xs
   where
     tomorrow = addDays 1 today
 filterTasks (OneDay day) _ xs = filter (sameDay day . date) xs
-filterTasks ThisWeek today xs = undefined
-filterTasks NextWeek today xs = undefined
-filterTasks (OneWeek day) today xs = undefined
+filterTasks ThisWeek today xs =
+  filter
+    (\x ->
+       case date x of
+         Nothing -> False
+         Just d -> diffDays d today < 7 && diffDays d today >= 0)
+    xs
+filterTasks NextWeek today xs =
+  filterTasks ThisWeek (findSunday (addDays 7 today)) xs
+filterTasks (OneWeek day) _ xs = filterTasks ThisWeek (findSunday day) xs
 filterTasks WithoutDate _ xs = filter (isNothing . date) xs
+filterTasks WithDate _ xs = filter (isJust . date) xs
 filterTasks All _ xs = xs
+
+findSunday day
+  | mod7 < 4 = addDays (-mod7 - 3) day
+  | mod7 == 4 = day
+  | mod7 > 4 = addDays (4 - mod7) day
+  where
+    num = toInteger $ fromEnum day
+    mod7 = num `rem` 7
 
 sameDay :: Day -> Maybe Day -> Bool
 sameDay day Nothing = False
 sameDay day (Just other) = day == other
-
-stringToDay :: String -> Maybe Day
-stringToDay = parseTimeM True defaultTimeLocale "%d/%m/%Y"
-
-getToday :: IO String
-getToday = do
-  day <- utctDay <$> getCurrentTime
-  return (dayToString day)

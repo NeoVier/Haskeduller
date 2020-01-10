@@ -1,23 +1,4 @@
 module Main where
-        {--data Command
-  = List ListOptions
-  | Add Name Bool Day Description Id
-  | Remove Id
-  | Update Id Name Day Description Bool
-
-data ListOptions
-  = Today
-  | Tomorrow
-  | OneDay Day
-  | ThisWeek
-  | NextWeek
-  | OneWeek Day
-  | WithoutDate
-  | All
-  deriving (Show)
-
-type Opts = Command
---}
 
 import CommandOptions
 import Data.Semigroup ((<>))
@@ -98,7 +79,8 @@ listOptions =
   List <$>
   hsubparser
     (today <>
-     tomorrow <> day <> week <> nextWeek <> oneWeek <> withoutDate <> listAll)
+     tomorrow <>
+     day <> week <> nextWeek <> oneWeek <> withoutDate <> withDate <> listAll)
   where
     today :: Mod CommandFields ListOptions
     today =
@@ -155,6 +137,13 @@ listOptions =
         (info
            (pure WithoutDate)
            (progDesc "List all tasks that aren't associated with dates."))
+    withDate :: Mod CommandFields ListOptions
+    withDate =
+      command
+        "with"
+        (info
+           (pure WithDate)
+           (progDesc "List all tasks that are associated with dates."))
     listAll :: Mod CommandFields ListOptions
     listAll = command "all" (info (pure All) (progDesc "List all tasks."))
 

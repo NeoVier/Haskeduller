@@ -22,6 +22,7 @@ data ListOptions
   | NextWeek
   | OneWeek Day
   | WithoutDate
+  | WithDate
   | All
   deriving (Show)
 
