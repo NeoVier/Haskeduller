@@ -1,9 +1,9 @@
 module Lib
   ( execList
-  , findSunday
+  , execAdd
   ) where
 
-import CommandOptions (ListOptions(..))
+import CommandOptions (AddFields(..), ListOptions(..))
 import Data.Maybe (isJust, isNothing)
 import Data.Time
 import Data.Time.Calendar
@@ -11,12 +11,15 @@ import Reading.JsonHelper
 import Reading.JsonP
 import Reading.Parser
 import Reading.TaskFromJson
+import System.Directory (getHomeDirectory, renameFile)
 import Task
 import Testing
+import Writing.Write
 
 scheduleFilePath :: FilePath
 scheduleFilePath = "/home/henrique/.haskeduller.sched"
 
+-- List command
 execList :: FilePath -> ListOptions -> IO ()
 execList file period = do
   jsonTasks <- parseFile file jsonValue
@@ -58,3 +61,40 @@ findSunday day
 sameDay :: Day -> Maybe Day -> Bool
 sameDay day Nothing = False
 sameDay day (Just other) = day == other
+
+-- Add command
+execAdd :: FilePath -> AddFields -> IO ()
+execAdd file addFields = do
+  jsonTasks <- parseFile file jsonValue
+  case jsonTasks of
+    Just contents -> do
+      homeDirectory <- getHomeDirectory
+      let tempFile = homeDirectory ++ "/haskedullertmp.json"
+      let tasks = mapJsonArray taskFromJson contents
+      let newTaskList = constructTaskList addFields tasks
+      writeTasks newTaskList tempFile
+      renameFile tempFile file
+      print newTaskList
+    Nothing -> do
+      let newTask = constructSimpleTask addFields "0"
+      writeTasks [newTask] file
+      print newTask
+
+constructSimpleTask :: AddFields -> Id -> Task
+constructSimpleTask (Fields name todo day description _) newId =
+  Simple newId (boolToState todo) name (Just day) description
+
+constructTaskList :: AddFields -> [Task] -> [Task]
+constructTaskList fields others
+  | fpid fields == "" = newTask : others
+  | otherwise = addChild newTask parentTask : filter (/= parentTask) others
+  where
+    newId = show (1 + length others)
+    newTask = constructSimpleTask fields newId
+    parentTask = head $ filter ((== fpid fields) . identifier) others
+
+addChild :: Task -> Task -> Task
+addChild child (Simple id state name date desc) =
+  Complex id state name date desc [child]
+addChild child (Complex id state name date desc children) =
+  Complex id state name date desc (child : children)

@@ -10,31 +10,14 @@ import Paths_Haskeduller (version)
 import Reading.JsonHelper
 import Task
 import Testing
+import Writing.TaskToJson
 
 main :: IO ()
 main = do
   opts <- execParser optsParser
   case opts of
-    List opt -> execList "test/example.json" opt
-    Add name state date description parent_id -> print "Adding"
-            {--if date == fromGregorian 1 1 1
-        then addTask
-               (taskFactory
-                  "0"
-                  (boolToState state)
-                  name
-                  Nothing
-                  description
-                  Nothing)
-        else addTask
-               (taskFactory
-                  "0"
-                  (boolToState state)
-                  name
-                  (Just date)
-                  description
-                  Nothing)
-		  --}
+    List opt -> execList "test/sched.json" opt
+    Add addFields -> execAdd "test/sched.json" addFields
     Remove id -> putStrLn ("Removing task: " ++ id)
     Update id new_name new_day new_description cycle ->
       putStrLn
@@ -102,7 +85,7 @@ listOptions =
       OneDay <$>
       argument
         dayReader
-        (metavar "DATE" <> help "Target date in the format %d-%m-%Y.")
+        (metavar "DATE" <> help "Target date in the format %d/%m/%Y.")
     week :: Mod CommandFields ListOptions
     week =
       command
@@ -149,25 +132,26 @@ listOptions =
 
 addOptions :: Parser Command
 addOptions =
-  Add <$> strArgument (metavar "NAME" <> help "Name of the new task.") <*>
-  switch
-    (long "state" <> short 's' <> help "Whether to mark it as TODO initially.") <*>
-  option
-    dayReader
-    (long "date" <>
-     metavar "DATE" <>
-     value (fromGregorian 1 1 1) <>
-     help "Set the due date in the format %d-%m-%Y.") <*>
-  strOption
-    (long "description" <>
-     short 'd' <>
-     value "" <> metavar "DESCRIPTION" <> help "Give the task some description.") <*>
-  option
-    auto
-    (long "parent" <>
-     short 'p' <>
-     value "" <>
-     metavar "PARENT ID" <> help "Set this task as child of PARENT ID.")
+  Add <$>
+  (Fields <$> strArgument (metavar "NAME" <> help "Name of the new task.") <*>
+   switch
+     (long "state" <> short 's' <> help "Whether to mark it as TODO initially.") <*>
+   option
+     dayReader
+     (long "date" <>
+      metavar "DATE" <>
+      value (fromGregorian 1 1 1) <>
+      help "Set the due date in the format %d-%m-%Y.") <*>
+   strOption
+     (long "description" <>
+      short 'd' <>
+      value "" <>
+      metavar "DESCRIPTION" <> help "Give the task some description.") <*>
+   strOption
+     (long "parent" <>
+      short 'p' <>
+      value "" <>
+      metavar "PARENT ID" <> help "Set this task as child of PARENT ID."))
 
 removeOptions :: Parser Command
 removeOptions =
@@ -184,7 +168,7 @@ updateOptions =
     (long "date" <>
      metavar "NEW DATE" <>
      value (fromGregorian 1 1 1) <>
-     help "Set new due date in the format %d-%m-%Y.") <*>
+     help "Set new due date in the format %d/%m/%Y.") <*>
   strOption
     (long "description" <>
      short 'd' <>

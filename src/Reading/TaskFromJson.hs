@@ -32,6 +32,7 @@ stateFromJson :: JsonValue -> State
 stateFromJson (JsonString "TODO") = Todo
 stateFromJson (JsonString "DONE") = Done
 stateFromJson (JsonString "NONE") = None
+stateFromJson (JsonString "") = None
 stateFromJson _ = error "Reading.TaskFromJson.stateFromJson: Invalid state"
 
 nameFromJson :: JsonValue -> Name

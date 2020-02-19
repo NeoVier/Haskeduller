@@ -24,6 +24,7 @@ data State
   = Todo
   | Done
   | None
+  deriving (Eq)
 
 instance Show State where
   show Todo = "TODO: "
@@ -50,6 +51,7 @@ data Task
       , description :: Description
       , children :: [Task]
       }
+  deriving (Eq)
 
 instance Show Task where
   show t = taskToString t 0
@@ -99,7 +101,9 @@ taskToString task indentation =
         ]
 
 dayToString :: Day -> String
-dayToString day = padNum d ++ "/" ++ padNum m ++ "/" ++ padNum y
+dayToString day
+  | day == fromGregorian 1 1 1 = ""
+  | otherwise = padNum d ++ "/" ++ padNum m ++ "/" ++ padNum y
   where
     (y, m, d) = toGregorian day
     padNum x

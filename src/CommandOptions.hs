@@ -1,6 +1,7 @@
 module CommandOptions
   ( Command(..)
   , ListOptions(..)
+  , AddFields(..)
   , Opts
   ) where
 
@@ -9,7 +10,7 @@ import Task
 
 data Command
   = List ListOptions
-  | Add Name Bool Day Description Id
+  | Add AddFields
   | Remove Id
   | Update Id Name Day Description Bool
   deriving (Show)
@@ -24,6 +25,16 @@ data ListOptions
   | WithoutDate
   | WithDate
   | All
+  deriving (Show)
+
+data AddFields =
+  Fields
+    { fname :: Name
+    , fstate :: Bool
+    , fdate :: Day
+    , fdesc :: Description
+    , fpid :: Id
+    }
   deriving (Show)
 
 type Opts = Command
