@@ -27,8 +27,8 @@ data State
   deriving (Eq)
 
 instance Show State where
-  show Todo = "TODO: "
-  show Done = "DONE: "
+  show Todo = "TODO"
+  show Done = "DONE"
   show None = ""
 
 boolToState :: Bool -> State
@@ -76,19 +76,25 @@ taskFactory id state name date description children =
 changeId :: Task -> Id -> Task
 changeId task id = task {identifier = id}
 
+displayState :: State -> String
+displayState None = ""
+displayState s = show s ++ ": "
+
 taskToString :: Task -> Integer -> String
 taskToString (Simple identifier state name day desc) indentation =
   case day of
     Nothing ->
       indent ++
       "[" ++
-      identifier ++ "] " ++ show state ++ name ++ ": \n\t" ++ indent ++ desc
+      identifier ++
+      "] " ++ displayState state ++ name ++ ": \n\t" ++ indent ++ desc
     Just day ->
       indent ++
       "[" ++
       identifier ++
       "] " ++
-      show state ++ name ++ ": " ++ dayToString day ++ "\n\t" ++ indent ++ desc
+      displayState state ++
+      name ++ ": " ++ dayToString day ++ "\n\t" ++ indent ++ desc
   where
     indent = concat ["\t" | _ <- [1 .. indentation]]
 taskToString task indentation =
