@@ -12,24 +12,7 @@
 					"name": "TEST00",
 					"date": "",
 					"description": "",
-					"children": [
-							{
-								"identifier": "0.0.0",
-								"state": "",
-								"name": "TEST000",
-								"date": "",
-								"description": "",
-								"children": [
-										{
-											"identifier": "0.0.0.0",
-											"state": "",
-											"name": "TEST0000",
-											"date": "",
-											"description": ""
-											}
-									]
-								}
-						]
+					"children": []
 					},
 				{
 					"identifier": "0.1",

@@ -2,6 +2,7 @@ module CommandUtils
   ( filterTasks
   , constructSimpleTask
   , constructTaskList
+  , removeTaskById
   ) where
 
 import CommandOptions (AddFields(..), ListOptions(..))
@@ -79,6 +80,9 @@ addChildR child (x:xs) taskList =
     (Complex pid pstate pname pdate pdesc pchildren) = originalParentTask
     newParentTask =
       Complex pid pstate pname pdate pdesc (addChildR child xs pchildren)
+
+removeTaskById :: Id -> [Task] -> [Task]
+removeTaskById id = removeTaskR (splitWhen (== '.') id)
 
 removeTask :: Task -> [Task] -> [Task]
 removeTask t = removeTaskR (splitWhen (== '.') (identifier t))

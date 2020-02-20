@@ -12,13 +12,16 @@ import Task
 import Testing
 import Writing.TaskToJson
 
+resultFile :: FilePath
+resultFile = "test/sched.json"
+
 main :: IO ()
 main = do
   opts <- execParser optsParser
   case opts of
-    List opt -> execList "test/sched.json" opt
-    Add addFields -> execAdd "test/sched.json" addFields
-    Remove id -> putStrLn ("Removing task: " ++ id)
+    List opt -> execList resultFile opt
+    Add addFields -> execAdd resultFile addFields
+    Remove id -> execRemove resultFile id -- putStrLn ("Removing task: " ++ id)
     Update id new_name new_day new_description cycle ->
       putStrLn
         (id ++
