@@ -1,16 +1,11 @@
 module Main where
 
 import CommandOptions
-import Data.Semigroup ((<>))
 import Data.Time
 import Data.Version (showVersion)
 import Lib
 import Options.Applicative
 import Paths_Haskeduller (version)
-import Reading.JsonHelper
-import Task
-import Testing
-import Writing.TaskToJson
 
 resultFile :: FilePath
 resultFile = "test/sched.json"
@@ -21,13 +16,8 @@ main = do
   case opts of
     List opt -> execList resultFile opt
     Add addFields -> execAdd resultFile addFields
-    Remove id -> execRemove resultFile id -- putStrLn ("Removing task: " ++ id)
-    Update id new_name new_day new_description cycle ->
-      putStrLn
-        (id ++
-         " " ++
-         new_name ++
-         " " ++ show new_day ++ " " ++ new_description ++ " " ++ show cycle)
+    Remove id -> execRemove resultFile id
+    Update fields -> execUpdate resultFile fields
   where
     optsParser :: ParserInfo Opts
     optsParser =
@@ -136,7 +126,7 @@ listOptions =
 addOptions :: Parser Command
 addOptions =
   Add <$>
-  (Fields <$> strArgument (metavar "NAME" <> help "Name of the new task.") <*>
+  (AddFields <$> strArgument (metavar "NAME" <> help "Name of the new task.") <*>
    switch
      (long "state" <> short 's' <> help "Whether to mark it as TODO initially.") <*>
    option
@@ -162,21 +152,23 @@ removeOptions =
 
 updateOptions :: Parser Command
 updateOptions =
-  Update <$> strArgument (metavar "ID" <> help "ID of the task to update.") <*>
-  strOption
-    (long "name" <>
-     short 'n' <> value "" <> metavar "NEW NAME" <> help "New task name.") <*>
-  option
-    dayReader
-    (long "date" <>
-     metavar "NEW DATE" <>
-     value (fromGregorian 1 1 1) <>
-     help "Set new due date in the format %d/%m/%Y.") <*>
-  strOption
-    (long "description" <>
-     short 'd' <>
-     value "" <> metavar "DESCRIPTION" <> help "New task description.") <*>
-  switch (long "cycle" <> short 'c' <> help "Cycle through TODO states.")
+  Update <$>
+  (UpdateFields <$>
+   strArgument (metavar "ID" <> help "ID of the task to update.") <*>
+   strOption
+     (long "name" <>
+      short 'n' <> value "" <> metavar "NEW NAME" <> help "New task name.") <*>
+   option
+     dayReader
+     (long "date" <>
+      metavar "NEW DATE" <>
+      value (fromGregorian 1 1 1) <>
+      help "Set new due date in the format %d/%m/%Y.") <*>
+   strOption
+     (long "description" <>
+      short 'd' <>
+      value "" <> metavar "DESCRIPTION" <> help "New task description.") <*>
+   switch (long "cycle" <> short 'c' <> help "Cycle through TODO states."))
 
 dayReader :: ReadM Day
 dayReader =

@@ -2,6 +2,7 @@ module CommandOptions
   ( Command(..)
   , ListOptions(..)
   , AddFields(..)
+  , UpdateFields(..)
   , Opts
   ) where
 
@@ -12,7 +13,7 @@ data Command
   = List ListOptions
   | Add AddFields
   | Remove Id
-  | Update Id Name Day Description Bool
+  | Update UpdateFields
   deriving (Show)
 
 data ListOptions
@@ -28,12 +29,22 @@ data ListOptions
   deriving (Show)
 
 data AddFields =
-  Fields
-    { fname :: Name
-    , fstate :: Bool
-    , fdate :: Day
-    , fdesc :: Description
-    , fpid :: Id
+  AddFields
+    { aname :: Name
+    , astate :: Bool
+    , adate :: Day
+    , adesc :: Description
+    , apid :: Id
+    }
+  deriving (Show)
+
+data UpdateFields =
+  UpdateFields
+    { uid :: String
+    , uname :: Name
+    , udate :: Day
+    , udesc :: Description
+    , ucycle :: Bool
     }
   deriving (Show)
 

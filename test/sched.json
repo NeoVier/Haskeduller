@@ -8,18 +8,35 @@
 		"children": [
 				{
 					"identifier": "0.0",
-					"state": "",
-					"name": "TEST00",
-					"date": "",
-					"description": "",
-					"children": []
-					},
-				{
-					"identifier": "0.1",
-					"state": "",
-					"name": "TEST01",
-					"date": "",
-					"description": ""
+					"state": "TODO",
+					"name": "NEWNAME",
+					"date": "21/02/2020",
+					"description": "Description",
+					"children": [
+							{
+								"identifier": "0.0.0",
+								"state": "",
+								"name": "TEST000",
+								"date": "",
+								"description": "",
+								"children": [
+										{
+											"identifier": "0.0.0.0",
+											"state": "",
+											"name": "TEST0000",
+											"date": "",
+											"description": ""
+											}
+									]
+								},
+							{
+								"identifier": "0.0.1",
+								"state": "",
+								"name": "TEST001",
+								"date": "",
+								"description": ""
+								}
+						]
 					}
 			]
 		}

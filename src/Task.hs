@@ -10,6 +10,7 @@ module Task
   , dayToString
   , changeId
   , toComplex
+  , isComplex
   ) where
 
 import Data.Time
@@ -78,6 +79,9 @@ toComplex (Simple identifier state name date description) =
     , children = []
     }
 toComplex t = t
+
+isComplex :: Task -> Bool
+isComplex t = toComplex t == t
 
 taskFactory ::
      Id -> State -> Name -> Maybe Day -> Description -> Maybe [Task] -> Task

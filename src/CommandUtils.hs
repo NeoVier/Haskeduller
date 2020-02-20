@@ -3,14 +3,17 @@ module CommandUtils
   , constructSimpleTask
   , constructTaskList
   , removeTaskById
+  , updateTaskList
   ) where
 
-import CommandOptions (AddFields(..), ListOptions(..))
+import CommandOptions (AddFields(..), ListOptions(..), UpdateFields(..))
 import Data.List.Split (splitWhen)
 import Data.Maybe (isJust, isNothing)
+import Data.Time
 import Data.Time.Calendar
 import Task
 
+-- List command
 filterTasks :: ListOptions -> Day -> [Task] -> [Task]
 filterTasks Today today xs = filter (sameDay today . date) xs
 filterTasks Tomorrow today xs = filter (sameDay tomorrow . date) xs
@@ -43,29 +46,34 @@ sameDay :: Day -> Maybe Day -> Bool
 sameDay day Nothing = False
 sameDay day (Just other) = day == other
 
+-- Add command
 constructSimpleTask :: AddFields -> Id -> Task
-constructSimpleTask (Fields name todo day description _) newId =
+constructSimpleTask (AddFields name todo day description _) newId =
   Simple newId (boolToState todo) name (Just day) description
 
 constructTaskList :: AddFields -> [Task] -> [Task]
 constructTaskList fields others
-  | fpid fields == "" = insertSorted others newTask
+  | apid fields == "" = insertSorted others newTask
   | otherwise = newTaskList
   where
     newId
-      | fpid fields == "" = show (length others)
-      | otherwise = fpid fields ++ "." ++ show (length (children oldParentTask))
+      | apid fields == "" = show (length others)
+      | otherwise = apid fields ++ "." ++ show (length (children oldParentTask))
     newTask = constructSimpleTask fields newId
-    simpleOldParentTask = findTask (splitWhen (== '.') (fpid fields)) others
+    simpleOldParentTask = findTaskById (splitWhen (== '.') (apid fields)) others
     oldParentTask = toComplex simpleOldParentTask
     newTaskList = addChild newTask others
 
-findTask :: [Id] -> [Task] -> Task
-findTask [] _ = error "src.Lib.findTask: Id not found"
-findTask [x] others = head $ filter ((== x) . lastDigit . identifier) others
+findTask :: Task -> [Task] -> Task
+findTask t = findTaskById (splitWhen (== '.') (identifier t))
+
+findTaskById :: [Id] -> [Task] -> Task
+findTaskById [] _ = error "src.Lib.findTask: Id not found"
+findTaskById [x] others = head $ filter ((== x) . lastDigit . identifier) others
   where
     lastDigit id = last $ splitWhen (== '.') id
-findTask (x:xs) others = findTask xs (children $ findTask [x] others)
+findTaskById (x:xs) others =
+  findTaskById xs (children $ findTaskById [x] others)
 
 addChild :: Task -> [Task] -> [Task]
 addChild child = addChildR child (splitWhen (== '.') (identifier child))
@@ -76,13 +84,10 @@ addChildR child [x] taskList = insertSorted taskList child
 addChildR child (x:xs) taskList =
   replace originalParentTask newParentTask taskList
   where
-    originalParentTask = toComplex $ findTask [x] taskList
+    originalParentTask = toComplex $ findTaskById [x] taskList
     (Complex pid pstate pname pdate pdesc pchildren) = originalParentTask
     newParentTask =
       Complex pid pstate pname pdate pdesc (addChildR child xs pchildren)
-
-removeTaskById :: Id -> [Task] -> [Task]
-removeTaskById id = removeTaskR (splitWhen (== '.') id)
 
 removeTask :: Task -> [Task] -> [Task]
 removeTask t = removeTaskR (splitWhen (== '.') (identifier t))
@@ -93,7 +98,7 @@ removeTaskR [x] others = filter ((/= x) . lastDigit) others
     lastDigit t = last $ splitWhen (== '.') (identifier t)
 removeTaskR (x:xs) others = replace oldParentTask newParentTask others
   where
-    oldParentTask = findTask [x] others
+    oldParentTask = findTaskById [x] others
     (Complex pid pstate pname pdate pdesc pchildren) = oldParentTask
     newParentTask =
       Complex pid pstate pname pdate pdesc (removeTaskR xs pchildren)
@@ -103,6 +108,7 @@ replace old new others = insertSorted (removeTaskR [lastDigitOld] others) new
   where
     lastDigitOld = last $ splitWhen (== '.') (identifier old)
 
+-- Assumes it's already on the right level
 insertSorted :: [Task] -> Task -> [Task]
 insertSorted [] x = [x]
 insertSorted (y:ys) x
@@ -113,3 +119,40 @@ insertSorted (y:ys) x
     listId t = splitWhen (== '.') (identifier t)
     lastDigit t = last $ listId t
     lenIdY = length (listId y) - 1
+
+-- Remove command
+removeTaskById :: Id -> [Task] -> [Task]
+removeTaskById id = removeTaskR (splitWhen (== '.') id)
+
+-- Update command
+updateTaskList :: UpdateFields -> [Task] -> [Task]
+updateTaskList updateFields tasks =
+  addChild newTask (removeTask desiredTask tasks)
+  where
+    idList = splitWhen (== '.') (uid updateFields)
+    desiredTask = findTaskById idList tasks
+    newTask = updateTask updateFields desiredTask
+
+updateTask :: UpdateFields -> Task -> Task
+updateTask (UpdateFields id upName upDate upDesc upCycle) t
+  | isComplex t =
+    Complex id updatedState updatedName updatedDate updatedDesc (children t)
+  | otherwise = Simple id updatedState updatedName updatedDate updatedDesc
+  where
+    updatedName = updatedField upName "" (name t)
+    updatedDate =
+      updatedField (Just upDate) (Just $ fromGregorian 1 1 1) (date t)
+    updatedDesc = updatedField upDesc "" (description t)
+    updatedState
+      | upCycle = updateState (state t)
+      | otherwise = state t
+
+updatedField :: Eq a => a -> a -> a -> a
+updatedField newValue nullValue oldValue
+  | newValue == nullValue = oldValue
+  | otherwise = newValue
+
+updateState :: State -> State
+updateState Todo = Done
+updateState Done = None
+updateState None = Todo

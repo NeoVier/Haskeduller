@@ -2,9 +2,10 @@ module Lib
   ( execList
   , execAdd
   , execRemove
+  , execUpdate
   ) where
 
-import CommandOptions (AddFields(..), ListOptions(..))
+import CommandOptions (AddFields(..), ListOptions(..), UpdateFields(..))
 import CommandUtils
 import Data.Time
 import Reading.JsonHelper
@@ -15,13 +16,8 @@ import System.Directory (getHomeDirectory, renameFile)
 import Task
 import Writing.Write
 
-scheduleFilePath :: FilePath
-scheduleFilePath = "/home/henrique/.haskeduller.sched"
-
-getTmpFile :: IO FilePath
-getTmpFile = do
-  homeDir <- getHomeDirectory
-  return $ homeDir ++ "/.cache/haskedullertmp.json"
+getTasks :: JsonValue -> [Task]
+getTasks = mapJsonArray taskFromJson
 
 -- List command
 execList :: FilePath -> ListOptions -> IO ()
@@ -30,8 +26,8 @@ execList file period = do
   case jsonTasks of
     Just contents -> do
       today <- utctDay <$> getCurrentTime
+      let tasks = getTasks contents
       mapM_ print (filterTasks period today tasks)
-      where tasks = mapJsonArray taskFromJson contents
     Nothing -> putStrLn $ parseError file
 
 -- Add command
@@ -40,11 +36,9 @@ execAdd file addFields = do
   jsonTasks <- parseFile file jsonValue
   case jsonTasks of
     Just contents -> do
-      tmpFile <- getTmpFile
-      let tasks = mapJsonArray taskFromJson contents
+      let tasks = getTasks contents
       let newTaskList = constructTaskList addFields tasks
-      writeTasks newTaskList tmpFile
-      renameFile tmpFile file
+      writeTasks newTaskList file
     Nothing -> do
       let newTask = constructSimpleTask addFields "0"
       writeTasks [newTask] file
@@ -55,9 +49,18 @@ execRemove file id = do
   jsonTasks <- parseFile file jsonValue
   case jsonTasks of
     Just contents -> do
-      let tasks = mapJsonArray taskFromJson contents
+      let tasks = getTasks contents
       let newTaskList = removeTaskById id tasks
-      tmpFile <- getTmpFile
-      writeTasks newTaskList tmpFile
-      renameFile tmpFile file
+      writeTasks newTaskList file
+    Nothing -> putStrLn $ parseError file
+
+-- Update command
+execUpdate :: FilePath -> UpdateFields -> IO ()
+execUpdate file updateFields = do
+  jsonTasks <- parseFile file jsonValue
+  case jsonTasks of
+    Just contents -> do
+      let tasks = getTasks contents
+      let newTaskList = updateTaskList updateFields tasks
+      writeTasks newTaskList file
     Nothing -> putStrLn $ parseError file
