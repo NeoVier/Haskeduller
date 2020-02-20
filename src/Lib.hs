@@ -89,7 +89,7 @@ constructSimpleTask (Fields name todo day description _) newId =
 constructTaskList :: AddFields -> [Task] -> [Task]
 constructTaskList fields others
   | fpid fields == "" = insertSorted others newTask
-  | otherwise = newTaskList -- filter (/= oldParentTask) others ++ [parentTask]
+  | otherwise = newTaskList
   where
     newId
       | fpid fields == "" = show (length others)
@@ -111,7 +111,7 @@ addChild child = addChildR child (splitWhen (== '.') (identifier child))
 
 addChildR :: Task -> [Id] -> [Task] -> [Task]
 addChildR _ [] _ = error "src.Lib.addChild: Invalid Id"
-addChildR child [x] taskList = insertSorted taskList child -- Duplicating parent?
+addChildR child [x] taskList = insertSorted taskList child
 addChildR child (x:xs) taskList =
   replace originalParentTask newParentTask taskList
   where
@@ -121,7 +121,7 @@ addChildR child (x:xs) taskList =
       Complex pid pstate pname pdate pdesc (addChildR child xs pchildren)
 
 removeTask :: Task -> [Task] -> [Task]
-removeTask t = removeTaskR (splitWhen (== '.') (identifier t)) -- filter (/= t)
+removeTask t = removeTaskR (splitWhen (== '.') (identifier t))
 
 removeTaskR :: [Id] -> [Task] -> [Task]
 removeTaskR [x] others = filter ((/= x) . lastDigit) others
