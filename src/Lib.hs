@@ -3,7 +3,7 @@ module Lib
   , execAdd
   , addChild
   , insertSorted
-  , findRootTask
+  , removeTask
   ) where
 
 import CommandOptions (AddFields(..), ListOptions(..))
@@ -95,27 +95,23 @@ constructTaskList fields others
       | fpid fields == "" = show (length others)
       | otherwise = fpid fields ++ "." ++ show (length (children oldParentTask))
     newTask = constructSimpleTask fields newId
-    oldParentTask =
-      toComplex $ findTask (splitWhen (== '.') (fpid fields)) others
+    simpleOldParentTask = findTask (splitWhen (== '.') (fpid fields)) others
+    oldParentTask = toComplex simpleOldParentTask
     newTaskList = addChild newTask others
-
-findRootTask :: Id -> [Task] -> Task
-findRootTask fullId others = head $ filter ((== rootId) . identifier) others
-  where
-    rootId = head $ splitWhen (== '.') fullId
 
 findTask :: [Id] -> [Task] -> Task
 findTask [] _ = error "src.Lib.findTask: Id not found"
-findTask [x] others = findRootTask x others
+findTask [x] others = head $ filter ((== x) . lastDigit . identifier) others
+  where
+    lastDigit id = last $ splitWhen (== '.') id
 findTask (x:xs) others = findTask xs (children $ findTask [x] others)
 
 addChild :: Task -> [Task] -> [Task]
 addChild child = addChildR child (splitWhen (== '.') (identifier child))
 
--- TODO: when including grandchildren giving exception: Prelude.head: empty list
 addChildR :: Task -> [Id] -> [Task] -> [Task]
 addChildR _ [] _ = error "src.Lib.addChild: Invalid Id"
-addChildR child [x] taskList = insertSorted taskList child
+addChildR child [x] taskList = insertSorted taskList child -- Duplicating parent?
 addChildR child (x:xs) taskList =
   replace originalParentTask newParentTask taskList
   where
@@ -125,7 +121,18 @@ addChildR child (x:xs) taskList =
       Complex pid pstate pname pdate pdesc (addChildR child xs pchildren)
 
 removeTask :: Task -> [Task] -> [Task]
-removeTask t = filter (/= t)
+removeTask t = removeTaskR (splitWhen (== '.') (identifier t)) -- filter (/= t)
+
+removeTaskR :: [Id] -> [Task] -> [Task]
+removeTaskR [x] others = filter ((/= x) . lastDigit) others
+  where
+    lastDigit t = last $ splitWhen (== '.') (identifier t)
+removeTaskR (x:xs) others = replace oldParentTask newParentTask others
+  where
+    oldParentTask = findTask [x] others
+    (Complex pid pstate pname pdate pdesc pchildren) = oldParentTask
+    newParentTask =
+      Complex pid pstate pname pdate pdesc (removeTaskR xs pchildren)
 
 replace :: Task -> Task -> [Task] -> [Task]
 replace old new others = insertSorted (removeTask old others) new
