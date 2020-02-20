@@ -1,9 +1,13 @@
 module Lib
   ( execList
   , execAdd
+  , addChild
+  , insertSorted
+  , findRootTask
   ) where
 
 import CommandOptions (AddFields(..), ListOptions(..))
+import Data.List.Split (splitWhen)
 import Data.Maybe (isJust, isNothing)
 import Data.Time
 import Data.Time.Calendar
@@ -74,11 +78,9 @@ execAdd file addFields = do
       let newTaskList = constructTaskList addFields tasks
       writeTasks newTaskList tempFile
       renameFile tempFile file
-      print newTaskList
     Nothing -> do
       let newTask = constructSimpleTask addFields "0"
       writeTasks [newTask] file
-      print newTask
 
 constructSimpleTask :: AddFields -> Id -> Task
 constructSimpleTask (Fields name todo day description _) newId =
@@ -86,15 +88,55 @@ constructSimpleTask (Fields name todo day description _) newId =
 
 constructTaskList :: AddFields -> [Task] -> [Task]
 constructTaskList fields others
-  | fpid fields == "" = newTask : others
-  | otherwise = addChild newTask parentTask : filter (/= parentTask) others
+  | fpid fields == "" = insertSorted others newTask
+  | otherwise = newTaskList -- filter (/= oldParentTask) others ++ [parentTask]
   where
-    newId = show (1 + length others)
+    newId
+      | fpid fields == "" = show (length others)
+      | otherwise = fpid fields ++ "." ++ show (length (children oldParentTask))
     newTask = constructSimpleTask fields newId
-    parentTask = head $ filter ((== fpid fields) . identifier) others
+    oldParentTask =
+      toComplex $ findTask (splitWhen (== '.') (fpid fields)) others
+    newTaskList = addChild newTask others
 
-addChild :: Task -> Task -> Task
-addChild child (Simple id state name date desc) =
-  Complex id state name date desc [child]
-addChild child (Complex id state name date desc children) =
-  Complex id state name date desc (child : children)
+findRootTask :: Id -> [Task] -> Task
+findRootTask fullId others = head $ filter ((== rootId) . identifier) others
+  where
+    rootId = head $ splitWhen (== '.') fullId
+
+findTask :: [Id] -> [Task] -> Task
+findTask [] _ = error "src.Lib.findTask: Id not found"
+findTask [x] others = findRootTask x others
+findTask (x:xs) others = findTask xs (children $ findTask [x] others)
+
+addChild :: Task -> [Task] -> [Task]
+addChild child = addChildR child (splitWhen (== '.') (identifier child))
+
+-- TODO: when including grandchildren giving exception: Prelude.head: empty list
+addChildR :: Task -> [Id] -> [Task] -> [Task]
+addChildR _ [] _ = error "src.Lib.addChild: Invalid Id"
+addChildR child [x] taskList = insertSorted taskList child
+addChildR child (x:xs) taskList =
+  replace originalParentTask newParentTask taskList
+  where
+    originalParentTask = toComplex $ findTask [x] taskList
+    (Complex pid pstate pname pdate pdesc pchildren) = originalParentTask
+    newParentTask =
+      Complex pid pstate pname pdate pdesc (addChildR child xs pchildren)
+
+removeTask :: Task -> [Task] -> [Task]
+removeTask t = filter (/= t)
+
+replace :: Task -> Task -> [Task] -> [Task]
+replace old new others = insertSorted (removeTask old others) new
+
+insertSorted :: [Task] -> Task -> [Task]
+insertSorted [] x = [x]
+insertSorted (y:ys) x
+  | (read (listId x !! lenIdY) :: Integer) <= (read (lastDigit y) :: Integer) =
+    x : y : ys
+  | otherwise = y : insertSorted ys x
+  where
+    listId t = splitWhen (== '.') (identifier t)
+    lastDigit t = last $ listId t
+    lenIdY = length (listId y) - 1
