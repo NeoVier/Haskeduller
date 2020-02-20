@@ -135,7 +135,9 @@ removeTaskR (x:xs) others = replace oldParentTask newParentTask others
       Complex pid pstate pname pdate pdesc (removeTaskR xs pchildren)
 
 replace :: Task -> Task -> [Task] -> [Task]
-replace old new others = insertSorted (removeTask old others) new
+replace old new others = insertSorted (removeTaskR [lastDigitOld] others) new
+  where
+    lastDigitOld = last $ splitWhen (== '.') (identifier old)
 
 insertSorted :: [Task] -> Task -> [Task]
 insertSorted [] x = [x]
