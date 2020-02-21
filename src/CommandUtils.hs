@@ -102,7 +102,7 @@ removeTaskR [x] others = filter ((/= x) . lastDigit) others
 removeTaskR (x:xs) others = replace oldParentTask newParentTask others
   where
     oldParentTask = findTaskById [x] others
-    (Complex pid pstate pname pdate pdesc pchildren) = oldParentTask
+    (Complex pid pstate pname pdate pdesc pchildren) = toComplex oldParentTask
     newParentTask =
       Complex pid pstate pname pdate pdesc (removeTaskR xs pchildren)
 

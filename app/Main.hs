@@ -148,7 +148,7 @@ addOptions =
      (long "parent" <>
       short 'p' <>
       value "" <>
-      metavar "PARENT ID" <> help "Set this task as child of PARENT ID."))
+      metavar "PARENT_ID" <> help "Set this task as child of PARENT_ID."))
 
 removeOptions :: Parser Command
 removeOptions =
