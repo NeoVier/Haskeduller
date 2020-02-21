@@ -11,7 +11,7 @@ Haskeduller is an [Org mode](https://orgmode.org) inspired TODO list manager.
 ### Installing
 
 To get Haskeduller, simply clone this repository by doing `git clone https://github.com/NeoVier/Haskeduller` or manually cloning through GitHub.
-To have the binary in one of your `$PATH` directories, run `stack build --copy-bins` inside the cloned directory.
+To have the binary in one of your `$PATH` directories, run `stack install` inside the cloned directory.
 
 ## Usage
 
