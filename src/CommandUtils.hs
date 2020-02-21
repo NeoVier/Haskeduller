@@ -68,10 +68,13 @@ findTask :: Task -> [Task] -> Task
 findTask t = findTaskById (splitWhen (== '.') (identifier t))
 
 findTaskById :: [Id] -> [Task] -> Task
-findTaskById [] _ = error "src.Lib.findTask: Id not found"
-findTaskById [x] others = head $ filter ((== x) . lastDigit . identifier) others
+findTaskById [] _ = error "src.Lib.findTaskById: Id not found"
+findTaskById [x] others
+  | null filteredList = error "src.Lib.findTaskById: Id not found" -- = head $ filter ((== x) . lastDigit . identifier) others
+  | otherwise = head filteredList
   where
     lastDigit id = last $ splitWhen (== '.') id
+    filteredList = filter ((== x) . lastDigit . identifier) others
 findTaskById (x:xs) others =
   findTaskById xs (children $ findTaskById [x] others)
 

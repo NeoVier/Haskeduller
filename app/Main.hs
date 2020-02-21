@@ -6,18 +6,22 @@ import Data.Version (showVersion)
 import Lib
 import Options.Applicative
 import Paths_Haskeduller (version)
+import System.Directory (getHomeDirectory)
 
-resultFile :: FilePath
-resultFile = "test/sched.json"
+getSchedFile :: IO FilePath
+getSchedFile = do
+  homeDir <- getHomeDirectory
+  return $ homeDir ++ "/.haskeduller.json"
 
 main :: IO ()
 main = do
   opts <- execParser optsParser
+  schedFile <- getSchedFile
   case opts of
-    List opt -> execList resultFile opt
-    Add addFields -> execAdd resultFile addFields
-    Remove id -> execRemove resultFile id
-    Update fields -> execUpdate resultFile fields
+    List opt -> execList schedFile opt
+    Add addFields -> execAdd schedFile addFields
+    Remove id -> execRemove schedFile id
+    Update fields -> execUpdate schedFile fields
   where
     optsParser :: ParserInfo Opts
     optsParser =
